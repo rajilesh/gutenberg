@@ -6,7 +6,13 @@ import { debounce, includes } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { Component, Children, cloneElement, concatChildren } from '@wordpress/element';
+import {
+	Component,
+	Children,
+	cloneElement,
+	findDOMNode,
+	concatChildren,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,6 +31,7 @@ class Tooltip extends Component {
 	constructor() {
 		super( ...arguments );
 
+		this.bindNode = this.bindNode.bind( this );
 		this.delayedSetIsOver = debounce(
 			( isOver ) => this.setState( { isOver } ),
 			TOOLTIP_DELAY
@@ -37,6 +44,46 @@ class Tooltip extends Component {
 
 	componentWillUnmount() {
 		this.delayedSetIsOver.cancel();
+		this.disconnectDisabledAttributeObserver();
+	}
+
+	componentDidUpdate( prevProps, prevState ) {
+		const { isOver } = this.state;
+		if ( isOver !== prevState.isOver ) {
+			if ( isOver ) {
+				this.observeDisabledAttribute();
+			} else {
+				this.disconnectDisabledAttributeObserver();
+			}
+		}
+	}
+
+	bindNode( ref ) {
+		this.node = findDOMNode( ref );
+	}
+
+	disconnectDisabledAttributeObserver() {
+		if ( this.observer ) {
+			this.observer.disconnect();
+		}
+	}
+
+	observeDisabledAttribute() {
+		if ( ! window.MutationObserver ) {
+			return;
+		}
+
+		this.observer = new window.MutationObserver( ( [ mutation ] ) => {
+			if ( mutation.target.disabled ) {
+				this.setState( { isOver: false } );
+			}
+		} );
+
+		this.observer.observe( this.node, {
+			subtree: true,
+			attributes: true,
+			attributeFilter: [ 'disabled' ],
+		} );
 	}
 
 	emitToChild( eventName, event ) {
@@ -96,6 +143,7 @@ class Tooltip extends Component {
 		const child = Children.only( children );
 		const { isOver } = this.state;
 		return cloneElement( child, {
+			ref: this.bindNode,
 			onMouseEnter: this.createToggleIsOver( 'onMouseEnter', true ),
 			onMouseLeave: this.createToggleIsOver( 'onMouseLeave' ),
 			onFocus: this.createToggleIsOver( 'onFocus' ),
