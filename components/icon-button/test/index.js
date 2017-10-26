@@ -61,5 +61,33 @@ describe( 'IconButton', () => {
 			expect( iconButton.name() ).toBe( 'Button' );
 			expect( iconButton.prop( 'aria-label' ) ).toBe( 'WordPress' );
 		} );
+
+		it( 'should dismiss tooltip when clicked', () => {
+			const onClick = jest.fn();
+			const iconButton = shallow( <IconButton label="WordPress" onClick={ onClick } /> );
+
+			iconButton.find( 'Button' ).simulate( 'click' );
+
+			expect( iconButton.name() ).not.toBe( 'Tooltip' );
+			expect( onClick ).toHaveBeenCalled();
+		} );
+
+		it( 'should reset tooltip dismissal after clicking then mousing out', () => {
+			const iconButton = shallow( <IconButton label="WordPress" /> );
+
+			iconButton.find( 'Button' ).simulate( 'click' );
+			iconButton.find( 'Button' ).simulate( 'mouseleave' );
+
+			expect( iconButton.name() ).toBe( 'Tooltip' );
+		} );
+
+		it( 'should reset tooltip dismissal after clicking then blurring', () => {
+			const iconButton = shallow( <IconButton label="WordPress" /> );
+
+			iconButton.find( 'Button' ).simulate( 'click' );
+			iconButton.find( 'Button' ).simulate( 'blur' );
+
+			expect( iconButton.name() ).toBe( 'Tooltip' );
+		} );
 	} );
 } );
