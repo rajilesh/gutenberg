@@ -14,6 +14,7 @@ import { keycodes } from '@wordpress/utils';
  * Internal dependencies
  */
 import './style.scss';
+import withFocusOutside from '../higher-order/with-focus-outside';
 import Button from '../button';
 import Popover from '../popover';
 
@@ -51,6 +52,10 @@ class Autocomplete extends Component {
 
 	reset() {
 		this.setState( this.constructor.getInitialState() );
+	}
+
+	handleFocusOutside() {
+		this.reset();
 	}
 
 	search( event ) {
@@ -181,7 +186,6 @@ class Autocomplete extends Component {
 				} ) }
 				<Popover
 					isOpen={ isOpen && filteredOptions.length > 0 }
-					onClose={ this.reset }
 					focusOnOpen={ false }
 					position="top right"
 					className={ classes }
@@ -210,4 +214,4 @@ class Autocomplete extends Component {
 	}
 }
 
-export default Autocomplete;
+export default withFocusOutside( Autocomplete );
