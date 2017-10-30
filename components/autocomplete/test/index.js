@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 /**
  * WordPress dependencies
@@ -11,9 +11,11 @@ import { keycodes } from '@wordpress/utils';
 /**
  * Internal dependencies
  */
-import Autocomplete from '../';
+import EnhancedAutocomplete, { Autocomplete } from '../';
 
 const { ENTER, ESCAPE, UP, DOWN, SPACE } = keycodes;
+
+jest.useFakeTimers();
 
 describe( 'Autocomplete', () => {
 	const options = [
@@ -256,6 +258,28 @@ describe( 'Autocomplete', () => {
 
 			expect( preventDefault ).toHaveBeenCalled();
 			expect( stopImmediatePropagation ).toHaveBeenCalled();
+		} );
+
+		it( 'closes by blur', () => {
+			jest.spyOn( Autocomplete.prototype, 'handleFocusOutside' );
+
+			const wrapper = mount(
+				<EnhancedAutocomplete options={ options } triggerPrefix="/">
+					<div contentEditable />
+				</EnhancedAutocomplete>
+			);
+
+			wrapper.find( '[contentEditable]' ).simulate( 'input', {
+				target: {
+					textContent: '/',
+				},
+			} );
+
+			wrapper.find( '[contentEditable]' ).simulate( 'blur' );
+
+			jest.runAllTimers();
+
+			expect( Autocomplete.prototype.handleFocusOutside ).toHaveBeenCalled();
 		} );
 
 		it( 'selects by enter', () => {

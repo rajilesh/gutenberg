@@ -20,7 +20,7 @@ import Popover from '../popover';
 
 const { ENTER, ESCAPE, UP, DOWN } = keycodes;
 
-class Autocomplete extends Component {
+export class Autocomplete extends Component {
 	static getInitialState() {
 		return {
 			isOpen: false,
