@@ -31,18 +31,12 @@ class Autocomplete extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.bindMenuNode = this.bindMenuNode.bind( this );
 		this.select = this.select.bind( this );
 		this.reset = this.reset.bind( this );
-		this.onBlur = this.onBlur.bind( this );
 		this.search = this.search.bind( this );
 		this.setSelectedIndex = this.setSelectedIndex.bind( this );
 
 		this.state = this.constructor.getInitialState();
-	}
-
-	bindMenuNode( node ) {
-		this.menuNode = node;
 	}
 
 	select( option ) {
@@ -57,14 +51,6 @@ class Autocomplete extends Component {
 
 	reset() {
 		this.setState( this.constructor.getInitialState() );
-	}
-
-	onBlur( event ) {
-		// Check if related target is not within, in the case that the user is
-		// selecting an option by button click
-		if ( this.menuNode && ! this.menuNode.contains( event.relatedTarget ) ) {
-			this.reset();
-		}
 	}
 
 	search( event ) {
@@ -188,16 +174,14 @@ class Autocomplete extends Component {
 		// Blur is applied to the wrapper node, since if the child is Editable,
 		// the event will not have `relatedTarget` assigned.
 		return (
-			<div
-				onBlur={ this.onBlur }
-				className="components-autocomplete"
-			>
+			<div className="components-autocomplete">
 				{ cloneElement( Children.only( children ), {
 					onInput: this.search,
 					onKeyDown: this.setSelectedIndex,
 				} ) }
 				<Popover
 					isOpen={ isOpen && filteredOptions.length > 0 }
+					onClose={ this.reset }
 					focusOnOpen={ false }
 					position="top right"
 					className={ classes }
@@ -205,7 +189,6 @@ class Autocomplete extends Component {
 					<ul
 						role="menu"
 						className="components-autocomplete__results"
-						ref={ this.bindMenuNode }
 					>
 						{ filteredOptions.map( ( option, index ) => (
 							<li
