@@ -36,6 +36,14 @@ class PanelBody extends Component {
 		}
 	}
 
+	componentWillReceiveProps( nextProps ) {
+		if ( this.props.initialOpen !== nextProps.initialOpen ) {
+			this.setState( {
+				opened: nextProps.initialOpen === undefined ? true : nextProps.initialOpen,
+			} );
+		}
+	}
+
 	render() {
 		const { title, children, opened, className } = this.props;
 		const isOpened = opened === undefined ? this.state.opened : opened;
